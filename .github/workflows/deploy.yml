@@ -1,0 +1,25 @@
+name: CI/CD Producción Local
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    steps:
+      - name: Obtener código nuevo
+        uses: actions/checkout@v3
+
+      - name: Copiar secretos locales
+        run: |
+          # Copiamos el .env que YA existe en tu servidor a la carpeta temporal del runner
+          cp /opt/app/.env .env
+      - name: Desplegar contenedores
+        run: |
+          echo "Reiniciando servicios con nuevos cambios..."
+          # docker compose buscará el .env en la carpeta actual (la del runner)
+          docker compose up -d --build --remove-orphans
+      - name: Limpieza
+        run: |
+          docker image prune -f
