@@ -1,0 +1,81 @@
+services:
+
+  db:
+    image: mysql:8
+    container_name: mysql_db
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - appnet
+
+  backend:
+    build: ./backend
+    container_name: backend_api
+    restart: always
+    ports:
+      - "4000:4000"
+    env_file:
+      - .env
+    depends_on:
+      - db
+    networks:
+      - appnet
+
+  frontend:
+    build: ./frontend
+    container_name: frontend_app
+    ports:
+      - "3000:80"
+    restart: always
+    depends_on:
+      - backend
+    networks:
+      - appnet
+  # ----------------------------------------------------------------
+  # NUEVOS SERVICIOS DE MONITOREO (Agregados)
+  # ----------------------------------------------------------------
+  # Node Exporter: Extrae métricas del SISTEMA (CPU, RAM, Disco de la VM Ubuntu)
+  node_exporter:
+    image: prom/node-exporter:latest
+    container_name: node_exporter
+    restart: unless-stopped
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--path.rootfs=/rootfs'
+    ports:
+      - "9100:9100"
+    networks:
+      - appnet
+
+  # cAdvisor: Extrae métricas de los CONTENEDORES (Uso de CPU/RAM por contenedor)
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor
+    restart: unless-stopped
+    # privileged: true es necesario en Ubuntu 24.04 para acceder a métricas del kernel
+    privileged: true
+    ports:
+      - "8080:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    networks:
+      - appnet
+
+volumes:
+  db_data:
+
+networks:
+  appnet:
+    driver: bridge
