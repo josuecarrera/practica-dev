@@ -18,10 +18,12 @@ jobs:
       - name: Desplegar contenedores
         run: |
           echo "Reiniciando servicios con nuevos cambios..."
-          docker rm -f cadvisor node_exporter || true
-          docker compose down
-          # docker compose buscará el .env en la carpeta actual (la del runner)
-          docker compose up -d --build --remove-orphans
+
+           # Eliminar contenedores con nombres fijos que puedan existir
+           docker rm -f cadvisor node_exporter mysql_db 2>/dev/null || true
+
+           docker compose down --remove-orphans
+           docker compose up -d --build --remove-orphans
       - name: Limpieza
         run: |
           docker image prune -f
