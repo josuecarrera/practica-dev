@@ -18,6 +18,7 @@ jobs:
       - name: Desplegar contenedores
         run: |
           echo "Reiniciando servicios con nuevos cambios..."
+          docker compose down
           # docker compose buscará el .env en la carpeta actual (la del runner)
           docker compose up -d --build --remove-orphans
       - name: Limpieza
