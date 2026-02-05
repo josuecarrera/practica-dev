@@ -1,134 +1,62 @@
-import React, { useState } from "react";
-import "./RegistrationForm.css";
+import React, { useState } from 'react';
 
-const RegistrationForm = () => {
-  // State is now in English (formData)
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    mobilePhone: "",
-    country: "",
-    gender: "",
-  });
+function FormularioUsuario() {
+  // 1. Cambiamos el estado de email a apellido
+  const [nombre, setNombre] = useState('');
+  const [apellido, setApellido] = useState('');
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
-  };
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Data ready to submit:", formData);
-    alert("Form submitted successfully!");
-    // Backend logic will go here later
+
+    // Usamos la variable de entorno
+    const API_URL = process.env.REACT_APP_API_URL;
+
+    try {
+      const response = await fetch(`${API_URL}/api/usuarios`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        // 2. Enviamos nombre y apellido en el JSON
+        body: JSON.stringify({ nombre, apellido }), 
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        alert(data.mensaje || "Usuario guardado exitosamente");
+      } else {
+        alert("Error del servidor: " + (data.mensaje || response.statusText));
+      }
+
+    } catch (error) {
+      console.error("Error conectando al backend:", error);
+      alert("Error al guardar");
+    }
   };
 
   return (
-    <div className="form-container">
-      <h2>Registro de Usuario</h2>
-      <form onSubmit={handleSubmit}>
-        {/* First Name */}
-        <div className="form-group">
-          <label>Nombre:</label>
-          <input
-            type="text"
-            name="firstName"
-            value={formData.firstName}
-            onChange={handleChange}
-            placeholder="Ej. Juan"
-            required
-          />
-        </div>
-
-        {/* Last Name */}
-        <div className="form-group">
-          <label>Apellido:</label>
-          <input
-            type="text"
-            name="lastName"
-            value={formData.lastName}
-            onChange={handleChange}
-            placeholder="Ej. Pérez"
-            required
-          />
-        </div>
-
-        {/* Mobile Phone */}
-        <div className="form-group">
-          <label>Celular:</label>
-          <input
-            type="tel"
-            name="mobilePhone"
-            value={formData.mobilePhone}
-            onChange={handleChange}
-            placeholder="+593 999 999 999"
-            required
-          />
-        </div>
-
-        {/* Country */}
-        <div className="form-group">
-          <label>País:</label>
-          <select
-            name="country"
-            value={formData.country}
-            onChange={handleChange}
-            required
-          >
-            <option value="">Selecciona un país</option>
-            <option value="Ecuador">Ecuador</option>
-            <option value="Mexico">México</option>
-            <option value="Colombia">Colombia</option>
-            <option value="Argentina">Argentina</option>
-            <option value="Spain">España</option>
-          </select>
-        </div>
-
-        {/* Gender (Radio Buttons) */}
-        <div className="form-group">
-          <label>Sexo:</label>
-          <div className="radio-group">
-            <label className="radio-label">
-              <input
-                type="radio"
-                name="gender"
-                value="male"
-                checked={formData.gender === "male"}
-                onChange={handleChange}
-              />
-              Hombre
-            </label>
-
-            <label className="radio-label">
-              <input
-                type="radio"
-                name="gender"
-                value="female"
-                checked={formData.gender === "female"}
-                onChange={handleChange}
-              />
-              Mujer
-            </label>
-          </div>
-        </div>
-
-        {/* Future Photo Upload */}
-        <div className="form-group future-upload">
-          <label>Foto de Perfil (Próximamente):</label>
-          <div className="upload-placeholder">
-            📁 Carga de archivos habilitada en la próxima versión
-          </div>
-        </div>
-
-        <button type="submit" className="submit-btn">
-          Guardar Información
-        </button>
-      </form>
-    </div>
+    <form onSubmit={handleSubmit}>
+      <input 
+        type="text" 
+        placeholder="Nombre" 
+        value={nombre}
+        onChange={(e) => setNombre(e.target.value)} 
+        required
+      />
+      
+      {/* 3. Cambiamos el input de Email por el de Apellido */}
+      <input 
+        type="text" 
+        placeholder="Apellido" 
+        value={apellido}
+        onChange={(e) => setApellido(e.target.value)} 
+        required
+      />
+      
+      <button type="submit">Guardar</button>
+    </form>
   );
-};
+}
 
-export default RegistrationForm;
+export default FormularioUsuario;
