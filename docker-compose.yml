@@ -1,6 +1,7 @@
 services:
   db:
     image: mysql:8
+    container_name: mysql_db  # <--- AGREGAMOS ESTO (Nombre fijo)
     restart: always
     env_file:
       - .env
@@ -8,21 +9,29 @@ services:
       - db_data:/var/lib/mysql
     networks:
       - appnet
+    # Healthcheck: Avisa cuando MySQL realmente ya arrancó
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
 
   backend:
     build: ./backend
+    container_name: backend_app # Nombre fijo para identificarlo fácil
     restart: always
     ports:
       - "4000:4000"
     env_file:
       - .env
     depends_on:
-      - db
+      db:
+        condition: service_healthy # Espera a que la DB esté sana
     networks:
       - appnet
 
   frontend:
     build: ./frontend
+    container_name: frontend_app
     restart: always
     ports:
       - "3000:80"
@@ -31,8 +40,7 @@ services:
     networks:
       - appnet
 
-  # ---------------- MONITOREO ----------------
-
+  # ... (La sección de monitoreo node_exporter y cadvisor déjala igual) ...
   node_exporter:
     image: prom/node-exporter:latest
     restart: unless-stopped
