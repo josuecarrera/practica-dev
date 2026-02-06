@@ -15,8 +15,8 @@ app.use(
 // Usamos los nombres de servicio de Docker o localhost si estás probando local
 const db = mysql.createPool({
   host: process.env.DB_HOST || 'mysql_db', // Nombre del servicio en docker-compose
-  user: 'root',
-  password: 'rootpass', // REEMPLAZA CON TU PASSWORD DEL DOCKER-COMPOSE
+  user: 'appuser',
+  password: 'AppPass123!', // REEMPLAZA CON TU PASSWORD DEL DOCKER-COMPOSE
   database: 'appdb',
   waitForConnections: true,
   connectionLimit: 10,
