@@ -1,59 +1,39 @@
 import React, { useState } from 'react';
+import { registrarUsuario } from '../services/userService'; // <--- Importamos el servicio
 
 function FormularioUsuario() {
-  // 1. Cambiamos el estado de email a apellido
   const [nombre, setNombre] = useState('');
   const [apellido, setApellido] = useState('');
+  const [email, setEmail] = useState(''); // Agregamos email
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Usamos la variable de entorno
-    const API_URL = process.env.REACT_APP_API_URL;
+    const datos = { nombre, apellido, email };
 
     try {
-      const response = await fetch(`${API_URL}/api/usuarios`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        // 2. Enviamos nombre y apellido en el JSON
-        body: JSON.stringify({ nombre, apellido }), 
-      });
-
-      const data = await response.json();
-      
-      if (response.ok) {
-        alert(data.mensaje || "Usuario guardado exitosamente");
-      } else {
-        alert("Error del servidor: " + (data.mensaje || response.statusText));
-      }
-
+      // Usamos el servicio en lugar del fetch directo
+      const respuesta = await registrarUsuario(datos);
+      alert('Éxito: ' + respuesta.mensaje);
     } catch (error) {
-      console.error("Error conectando al backend:", error);
-      alert("Error al guardar");
+      alert('Error al guardar el usuario');
     }
   };
 
   return (
     <form onSubmit={handleSubmit}>
       <input 
-        type="text" 
-        placeholder="Nombre" 
-        value={nombre}
+        type="text" placeholder="Nombre" 
         onChange={(e) => setNombre(e.target.value)} 
-        required
       />
-      
-      {/* 3. Cambiamos el input de Email por el de Apellido */}
       <input 
-        type="text" 
-        placeholder="Apellido" 
-        value={apellido}
+        type="text" placeholder="Apellido" 
         onChange={(e) => setApellido(e.target.value)} 
-        required
       />
-      
+      <input 
+        type="email" placeholder="Email" 
+        onChange={(e) => setEmail(e.target.value)} 
+      />
       <button type="submit">Guardar</button>
     </form>
   );
