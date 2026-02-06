@@ -5,6 +5,11 @@ const app = express();
 
 app.use(express.json());
 app.use(cors());
+app.use(
+  helmet({
+    contentSecurityPolicy: false,
+  })
+);
 
 // 1. Configuración de la Base de Datos
 // Usamos los nombres de servicio de Docker o localhost si estás probando local
